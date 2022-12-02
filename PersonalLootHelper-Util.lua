@@ -62,7 +62,7 @@ function PLH_CreateEmptyTooltip(rows)
 	local rightside = {}
 	local L, R
     for i = 1, rows do
-        L, R = tooltip:CreateFontString(), tooltip:CreateFontString()
+        L, R = tooltip:CreateFontString("$parentTextLeft"..i), tooltip:CreateFontString("$parentTextRight"..i)
         L:SetFontObject(GameFontNormal)
         R:SetFontObject(GameFontNormal)
     	tooltip:AddFontStrings(L, R)
