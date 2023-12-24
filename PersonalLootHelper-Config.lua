@@ -253,7 +253,7 @@ function PLH_CreateOptionsPanel()
 	
 	--[[ OnShow Event]]
 	configFrame:SetScript('OnShow', function(frame)
---		autoHideCheckbox:SetChecked(PLH_PREFS[PLH_PREFS_AUTO_HIDE])
+		-- autoHideCheckbox:SetChecked(PLH_PREFS[PLH_PREFS_AUTO_HIDE])
 		skipConfirmationCheckbox:SetChecked(PLH_PREFS[PLH_PREFS_SKIP_CONFIRMATION])
 		announceTradesCheckbox:SetChecked(PLH_PREFS[PLH_PREFS_ANNOUNCE_TRADES])
 		onlyOfferIfUpgradeCheckbox:SetChecked(PLH_PREFS[PLH_PREFS_ONLY_OFFER_IF_UPGRADE])
@@ -266,9 +266,9 @@ function PLH_CreateOptionsPanel()
 		UpdateThankYouLabel()
 	end)
 
-	--[[ Okay Action ]]--
-	function configFrame.okay(arg1, arg2, arg3, ...)
---		PLH_PREFS[PLH_PREFS_AUTO_HIDE] = autoHideCheckbox:GetChecked()
+	--[[ Save config ]]--
+    configFrame:SetScript("OnHide", function()
+		-- PLH_PREFS[PLH_PREFS_AUTO_HIDE] = autoHideCheckbox:GetChecked()
 		PLH_PREFS[PLH_PREFS_SKIP_CONFIRMATION] = skipConfirmationCheckbox:GetChecked()
 		PLH_PREFS[PLH_PREFS_ANNOUNCE_TRADES] = announceTradesCheckbox:GetChecked()
 		PLH_PREFS[PLH_PREFS_ONLY_OFFER_IF_UPGRADE] = onlyOfferIfUpgradeCheckbox:GetChecked()
@@ -281,6 +281,6 @@ function PLH_CreateOptionsPanel()
 			PLH_PREFS[PLH_PREFS_WHISPER_MESSAGE] = whisperMessageEditBox:GetText()
 			PLH_META[PLH_SHOW_WHISPER_WARNING] = true
 		end
-	end
+	end)
 
 end

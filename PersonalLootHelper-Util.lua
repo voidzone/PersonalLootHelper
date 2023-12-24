@@ -44,36 +44,6 @@ Finger				nil
 Trinket				nil
 ]]--
 
---[[
-creates an empty tooltip that is ready to be populated with the information from an item
--- note: a complicated tooltip could have the following lines (ex):
-	1 - Oathclaw Helm, nil
-	2 - Mythic, nil
-	3 - Item Level 735
-	4 - Upgrade Level: 2/2, nil
-	5 - Binds when picked up, nil
-	6 - Head, Leather
-	
-	rows - how many rows of the tooltip to populate; prior to version 1.24 we only cared about the first 6 rows, but to find the 'classes:' row we have to go much deeper
-]]--
-function PLH_CreateEmptyTooltip(rows)
-    local tooltip = CreateFrame('GameTooltip', "PLHTooltip", nil, GameTooltipDataMixin and "GameTooltipTemplate")
-	local leftside = {}
-	local rightside = {}
-	local L, R
-    for i = 1, rows do
-        L, R = tooltip:CreateFontString("$parentTextLeft"..i), tooltip:CreateFontString("$parentTextRight"..i)
-        L:SetFontObject(GameFontNormal)
-        R:SetFontObject(GameFontNormal)
-    	tooltip:AddFontStrings(L, R)
-        leftside[i] = L
-		rightside[i] = R
-    end
-    tooltip.leftside = leftside
-	tooltip.rightside = rightside
-	tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-	return tooltip
-end
 
 local function GetNameWithoutSpacesInRealm(name)
 	if name == nil or string.find(name, '-') == nil then
