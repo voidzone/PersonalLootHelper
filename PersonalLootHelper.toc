@@ -3,7 +3,7 @@
 ## Version: @project-version@
 ## SavedVariables: PLH_META, PLH_PREFS, PLH_STATS
 ## Notes: Simplifies trading of personal loot with other group members.
-## Author: Madone-Zul'Jin (voidzone@github's fork)
+## Author: cardinalm1, Elvenbane
 
 libs\LibStub\LibStub.lua
 libs\MSA-DropDownMenu-1.0\MSA-DropDownMenu-1.0.xml
