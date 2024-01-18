@@ -1643,7 +1643,8 @@ local function CreateLootedItemsDisplay()
 	lootedItemsFrame:Hide()
 	
 	-- Welcome message
-	if PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] == nil or tonumber(PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION]) < 2.0 then
+	PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] = PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] or 0
+	if tonumber(PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION]) < 2.0 then
 		local welcomeText = "Welcome to Personal Loot Helper (PLH) 2.0!!\n\n" ..
 			"This window will show tradeable loot!\n\n" ..
 			"Move by dragging with left mouse button.\n" ..

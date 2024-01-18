@@ -1,4 +1,4 @@
-## Interface: 100200
+## Interface: 100205
 ## Title: Personal Loot Helper
 ## Version: @project-version@
 ## SavedVariables: PLH_META, PLH_PREFS, PLH_STATS
