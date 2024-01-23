@@ -1643,8 +1643,7 @@ local function CreateLootedItemsDisplay()
 	lootedItemsFrame:Hide()
 	
 	-- Welcome message
-	PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] = PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] or 0
-	if tonumber(PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION]) < 2.0 then
+	if PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] and tonumber(PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION]) and tonumber(PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION]) < 2.0 then
 		local welcomeText = "Welcome to Personal Loot Helper (PLH) 2.0!!\n\n" ..
 			"This window will show tradeable loot!\n\n" ..
 			"Move by dragging with left mouse button.\n" ..
@@ -1664,7 +1663,9 @@ local function CreateLootedItemsDisplay()
 		welcomeLabel:SetText(welcomeText)
 		scrollbar:Show()
 		lootedItemsFrame:Show()
-		PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] = GetAddOnMetadata('PersonalLootHelper', 'Version')
+		PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] = string.gsub(GetAddOnMetadata('PersonalLootHelper', 'Version'),"v","")
+	elseif PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] and not tonumber(PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION]) then
+		PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] = string.gsub(GetAddOnMetadata('PersonalLootHelper', 'Version'),'v','')
 	end
 
 end
