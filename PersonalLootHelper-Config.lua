@@ -4,7 +4,9 @@ function PLH_CreateOptionsPanel()
 	local configFrame = CreateFrame('Frame', 'PLHConfigFrame', InterfaceOptionsFramePanelContainer)
 	configFrame:Hide()
 	configFrame.name = 'Personal Loot Helper'
-	InterfaceOptions_AddCategory(configFrame)
+	local category, layout = Settings.RegisterCanvasLayoutCategory(configFrame, configFrame.name, configFrame.name);
+	category.ID = configFrame.name;
+	Settings.RegisterAddOnCategory(category);
 
 	--[[ Title ]]--
 	local titleLabel = configFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalLarge')
