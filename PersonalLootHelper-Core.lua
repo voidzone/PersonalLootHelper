@@ -2576,8 +2576,7 @@ function SlashCmdList.PLHCommand(msg)
 --			lootedItemsFrame:Show()
 --		end
 	if msg == nil or msg == '' or string.upper(msg) == 'CONFIG' then
-		InterfaceOptionsFrame_OpenToCategory('Personal Loot Helper')
-		InterfaceOptionsFrame_OpenToCategory('Personal Loot Helper')  -- hack; called twice to get around Blizz bug of it not opening to correct page right away
+		Settings.OpenToCategory('Personal Loot Helper')
 	elseif string.upper(msg) == 'SHOW' then
 		lootedItemsFrame:Show()
 	elseif string.upper(msg) == 'HIDE' then
