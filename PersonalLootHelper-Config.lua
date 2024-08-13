@@ -15,14 +15,14 @@ function PLH_CreateOptionsPanel()
 
 	-- [[ Version ]] --
 	local versionLabel = configFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalSmall')
-	local metaVersion = GetAddOnMetadata('PersonalLootHelper', 'Version')
+	local metaVersion = C_AddOns.GetAddOnMetadata('PersonalLootHelper', 'Version')
 	versionLabel:SetPoint('BOTTOMLEFT', titleLabel, 'BOTTOMRIGHT', 8, 0)
 	versionLabel:SetText(((metaVersion:find("^v") ~= nil) and "" or "v") .. metaVersion)
 
 	--[[ Author ]]--
 	local authorLabel = configFrame:CreateFontString(nil, 'ARTWORK', 'GameFontNormalSmall')
 	authorLabel:SetPoint('TOPRIGHT', configFrame, 'TOPRIGHT', -16, -24)
-	authorLabel:SetText(GetAddOnMetadata('PersonalLootHelper', 'Author'))
+	authorLabel:SetText(C_AddOns.GetAddOnMetadata('PersonalLootHelper', 'Author'))
 
 	--[[ Display Options ]]--
 	local displayLabel = configFrame:CreateFontString(nil, 'ARTWORK', 'GameFontHighlight')

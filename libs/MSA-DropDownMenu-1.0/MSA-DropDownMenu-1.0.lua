@@ -1669,7 +1669,7 @@ end
 
 -- ElvUI skin
 local function LoadSkin_ElvUI()
-    if not IsAddOnLoaded("ElvUI") then return end
+    if not C_AddOns.IsAddOnLoaded("ElvUI") then return end
     local E = unpack(_G.ElvUI)
     if E.private.skins.blizzard.misc ~= true then return end
     for i = 1, MSA_DROPDOWNMENU_MAXLEVELS do
@@ -1680,7 +1680,7 @@ end
 
 -- Tukui skin
 local function LoadSkin_Tukui()
-    if not IsAddOnLoaded("Tukui") then return end
+    if not C_AddOns.IsAddOnLoaded("Tukui") then return end
     local backdrop
     for i = 1, MSA_DROPDOWNMENU_MAXLEVELS do
         backdrop = _G["MSA_DropDownList"..i.."MenuBackdrop"]
@@ -1698,7 +1698,7 @@ end
 
 -- Aurora skin
 local function LoadSkin_Aurora()
-    if not IsAddOnLoaded("Aurora") then return end
+    if not C_AddOns.IsAddOnLoaded("Aurora") then return end
     local Skin = _G.Aurora.Skin
     for i = 1, MSA_DROPDOWNMENU_MAXLEVELS do
         Skin.FrameTypeFrame(_G["MSA_DropDownList"..i.."MenuBackdrop"])

@@ -1663,9 +1663,9 @@ local function CreateLootedItemsDisplay()
 		welcomeLabel:SetText(welcomeText)
 		scrollbar:Show()
 		lootedItemsFrame:Show()
-		PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] = string.gsub(GetAddOnMetadata('PersonalLootHelper', 'Version'),"v","")
+		PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] = string.gsub(C_AddOns.GetAddOnMetadata('PersonalLootHelper', 'Version'),"v","")
 	elseif PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] and not tonumber(PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION]) then
-		PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] = string.gsub(GetAddOnMetadata('PersonalLootHelper', 'Version'),'v','')
+		PLH_META[PLH_LAST_SEEN_MESSAGE_VERSION] = string.gsub(C_AddOns.GetAddOnMetadata('PersonalLootHelper', 'Version'),'v','')
 	end
 
 end
@@ -1920,7 +1920,7 @@ local function PLH_ProcessVersionMessage(plhUser, version)
 		if ShouldShowLootedItemsDisplay() then
 			UpdateLootedItemsDisplay()
 		end
-		if version > GetAddOnMetadata('PersonalLootHelper', 'Version') and not showedVersionAlert then
+		if version > C_AddOns.GetAddOnMetadata('PersonalLootHelper', 'Version') and not showedVersionAlert then
 			PLH_SendUserMessage("Your version of Personal Loot Helper is out-of-date. You can download version " .. version .. " from the Twitch app or by searching for PLH on curseforge.com")
 			showedVersionAlert = true
 		end
@@ -1930,7 +1930,7 @@ end
 local function PLH_ProcessIdentifyUsersMessage()
 --	PLH_SendDebugMessage('Entering PLH_ProcessIdentifyUsersMessage()')
 
-	PLH_SendAddonMessage('VERSION~ ~' .. PLH_GetFullName('player') .. '~' .. GetAddOnMetadata('PersonalLootHelper', 'Version'))
+	PLH_SendAddonMessage('VERSION~ ~' .. PLH_GetFullName('player') .. '~' .. C_AddOns.GetAddOnMetadata('PersonalLootHelper', 'Version'))
 end	
 
 -- Event handler for CHAT_MSG_ADDON event
