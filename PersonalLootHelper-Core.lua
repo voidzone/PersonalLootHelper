@@ -134,6 +134,8 @@ CHANGELOG:
 	
 ]]--
 
+local GetItemInfo = GetItemInfo or C_Item.GetItemInfo
+
 -- Constants to control inspection process
 local DELAY_BETWEEN_INSPECTIONS_LONG	= 12	-- in seconds
 local DELAY_BETWEEN_INSPECTIONS_SHORT	= 0.2	-- in seconds
