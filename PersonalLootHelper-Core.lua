@@ -2476,7 +2476,7 @@ end
 
 local function EnableOrDisable()
 	local inInstance, instanceType = IsInInstance()
-	local isPersonalLoot = (IsInGroup(LE_PARTY_CATEGORY_INSTANCE) or (IsInGroup() and C_PartyInfo.GetLootMethod() == 'personalloot'))
+	local isPersonalLoot = (IsInGroup(LE_PARTY_CATEGORY_INSTANCE) or (IsInGroup() and C_PartyInfo.GetLootMethod() == 5))
 		and (instanceType == "party" or instanceType == "raid")
 	local shouldBeEnabled = isPersonalLoot
 
