@@ -2210,6 +2210,9 @@ local function LootReceivedEvent(self, event, ...)
 ]]--
 	
 	local message, _, _, _, looter = ...
+	if issecretvalue(message) then
+		return
+	end
 	local lootedItem = message:match(LOOT_ITEM_SELF_PATTERN)
 	if lootedItem == nil then
 		_, lootedItem = message:match(LOOT_ITEM_PATTERN)

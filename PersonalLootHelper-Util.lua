@@ -63,7 +63,7 @@ function PLH_GetFullName(name)
 	else
 		local guid = UnitGUID(name)
 		if guid ~= nil then
-			local _, _, _, _, _, shortname, realm = GetPlayerInfoByGUID(guid)
+			local shortname, realm = UnitNameFromGUID(guid)
 			if not realm or realm == '' then
 				realm = GetRealmName()
 			end
