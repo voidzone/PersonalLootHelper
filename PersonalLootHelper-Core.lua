@@ -231,13 +231,14 @@ local SHAMAN						= select(2, GetClassInfo(7))
 local WARLOCK						= select(2, GetClassInfo(9))
 local WARRIOR						= select(2, GetClassInfo(1))
 
--- Specialization IDs from http://wow.gamepedia.com/API_GetInspectSpecialization
+-- Specialization IDs from https://warcraft.wiki.gg/wiki/API_GetInspectSpecialization
 local SPECS = {
 	DK_BLOOD						= 250,
 	DK_FROST						= 251,
 	DK_UNHOLY						= 252,
 	DH_HAVOC						= 577,
 	DH_VENGEANCE					= 581,
+	DH_DEVOURER						= 1480,
 	DRUID_BALANCE					= 102,
 	DRUID_FERAL						= 103,
 	DRUID_GUARDIAN					= 104,
@@ -276,7 +277,7 @@ local SPECS = {
 
 local SPEC_BY_CLASS = {
 	[DEATH_KNIGHT]					= { SPECS.DK_BLOOD, SPECS.DK_FROST, SPECS.DK_UNHOLY },
-	[DEMON_HUNTER]					= { SPECS.DH_HAVOC, SPECS.DH_VENGEANCE },
+	[DEMON_HUNTER]					= { SPECS.DH_HAVOC, SPECS.DH_VENGEANCE, SPECS.DH_DEVOURER },
 	[DRUID]							= { SPECS.DRUID_BALANCE, SPECS.DRUID_FERAL, SPECS.DRUID_GUARDIAN, SPECS.DRUID_RESTO },
 	[EVOKER]						= { SPECS.EVOKER_DEVA, SPECS.EVOKER_PRES, SPECS.EVOKER_AUG },
 	[HUNTER]						= { SPECS.HUNTER_BM, SPECS.HUNTER_MARKS, SPECS.HUNTER_SURVIVAL },
@@ -297,6 +298,7 @@ local ROLE_BY_SPEC = {
 	[SPECS.DK_UNHOLY]				= PLH_ROLE_STRENGTH_DPS,
 	[SPECS.DH_HAVOC]				= PLH_ROLE_AGILITY_DPS,
 	[SPECS.DH_VENGEANCE]			= PLH_ROLE_TANK,
+	[SPECS.DH_DEVOURER]				= PLH_ROLE_INTELLECT_DPS,
 	[SPECS.DRUID_BALANCE]			= PLH_ROLE_INTELLECT_DPS,
 	[SPECS.DRUID_FERAL]				= PLH_ROLE_AGILITY_DPS,
 	[SPECS.DRUID_GUARDIAN]			= PLH_ROLE_TANK,
@@ -339,6 +341,7 @@ local PRIMARY_ATTRIBUTE_BY_SPEC = {
 	[SPECS.DK_UNHOLY]				= ITEM_MOD_STRENGTH_SHORT,
 	[SPECS.DH_HAVOC]				= ITEM_MOD_AGILITY_SHORT,
 	[SPECS.DH_VENGEANCE]			= ITEM_MOD_AGILITY_SHORT,
+	[SPECS.DH_DEVOURER]				= ITEM_MOD_INTELLECT_SHORT,
 	[SPECS.DRUID_BALANCE]			= ITEM_MOD_INTELLECT_SHORT,
 	[SPECS.DRUID_FERAL]				= ITEM_MOD_AGILITY_SHORT,
 	[SPECS.DRUID_GUARDIAN]			= ITEM_MOD_AGILITY_SHORT,
@@ -384,6 +387,7 @@ local EQUIPPABLE_ARMOR_BY_SPEC = {
 	[SPECS.DK_UNHOLY]				= { ItemArmorSubclass.Plate },
 	[SPECS.DH_HAVOC]				= { ItemArmorSubclass.Leather },
 	[SPECS.DH_VENGEANCE]			= { ItemArmorSubclass.Leather },
+	[SPECS.DH_DEVOURER]				= { ItemArmorSubclass.Leather },
 	[SPECS.DRUID_BALANCE]			= { ItemArmorSubclass.Leather, ItemArmorSubclass.Generic },
 	[SPECS.DRUID_FERAL]				= { ItemArmorSubclass.Leather },
 	[SPECS.DRUID_GUARDIAN]			= { ItemArmorSubclass.Leather },
@@ -426,6 +430,7 @@ local EQUIPPABLE_WEAPON_BY_SPEC = {
 	[SPECS.DK_UNHOLY]				= { ItemWeaponSubclass.Axe2H, ItemWeaponSubclass.Mace2H, ItemWeaponSubclass.Polearm, ItemWeaponSubclass.Sword2H },
 	[SPECS.DH_HAVOC]				= { ItemWeaponSubclass.Axe1H, ItemWeaponSubclass.Sword1H, ItemWeaponSubclass.Unarmed, ItemWeaponSubclass.Warglaive },
 	[SPECS.DH_VENGEANCE]			= { ItemWeaponSubclass.Axe1H, ItemWeaponSubclass.Sword1H, ItemWeaponSubclass.Unarmed, ItemWeaponSubclass.Warglaive },
+	[SPECS.DH_DEVOURER]				= { ItemWeaponSubclass.Axe1H, ItemWeaponSubclass.Sword1H, ItemWeaponSubclass.Unarmed, ItemWeaponSubclass.Warglaive },
 	[SPECS.DRUID_BALANCE]			= { ItemWeaponSubclass.Dagger, ItemWeaponSubclass.Mace1H, ItemWeaponSubclass.Mace2H, ItemWeaponSubclass.Polearm, ItemWeaponSubclass.Staff, ItemWeaponSubclass.Unarmed },
 	[SPECS.DRUID_FERAL]				= { ItemWeaponSubclass.Mace2H, ItemWeaponSubclass.Polearm, ItemWeaponSubclass.Staff },
 	[SPECS.DRUID_GUARDIAN]			= { ItemWeaponSubclass.Mace2H, ItemWeaponSubclass.Polearm, ItemWeaponSubclass.Staff },
@@ -466,6 +471,7 @@ local SPECS_EXPECTED_TO_HAVE_OFFHAND = {
 	[SPECS.DK_FROST] 				= true,
 	[SPECS.DH_VENGEANCE]			= true,
 	[SPECS.DH_HAVOC] 				= true,
+	[SPECS.DH_DEVOURER] 			= true,
 	[SPECS.MONK_WW] 				= true,
 	[SPECS.PALADIN_PROT] 			= true,
 	[SPECS.ROGUE_ASS] 				= true,
@@ -1774,7 +1780,7 @@ local function CreateAddonTextString(process, lootedItem, options)
 end
 
 local function PLH_SendAddonMessage(addonTextString, characterName)
--- per documentation at https://wow.gamepedia.com/API_SendAddonMessage, whispers don't work cross-realm, so we'll have to broadcast requests to everyone
+-- per documentation at https://warcraft.wiki.gg/wiki/API_C_ChatInfo.SendAddonMessage, whispers don't work cross-realm, so we'll have to broadcast requests to everyone
 --	if characterName == nil then
 		PLH_SendDebugMessage('Sending AddonMessage: ' .. addonTextString)
 --	else
