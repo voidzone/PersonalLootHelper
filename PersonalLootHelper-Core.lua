@@ -590,6 +590,9 @@ local function GetItemPrimaryAttribute(item)
 end
 
 local function IsPlayer(characterName)
+	if characterName == nil then
+		return false
+	end
 	return characterName == 'player'
 		or characterName == PLH_GetFullName('player')
 		or characterName == UnitName('player')
@@ -1722,6 +1725,10 @@ end
 
 -- Adds the item to the lootedItems array; returns the index of the newly added item
 local function AddLootedItem(fullItemInfo, characterName, status)
+	if characterName == nil then
+		return nil
+	end
+
 	local lootedItemIndex = #lootedItems + 1
 
 	lootedItems[lootedItemIndex] = {}
@@ -1841,8 +1848,10 @@ function PLH_ProcessTradeItemMessage(looterName, item)
 			local fullItemInfo = GetFullItemInfo(item)
 			if shouldAddLootedItem(fullItemInfo) then
 				local lootedItemIndex = AddLootedItem(fullItemInfo, looterName)
-				lootedItems[lootedItemIndex][STATUS] = STATUS_AVAILABLE
-				UpdateLootedItemsDisplay()
+				if lootedItemIndex ~= nil then
+					lootedItems[lootedItemIndex][STATUS] = STATUS_AVAILABLE
+					UpdateLootedItemsDisplay()
+				end
 			elseif ShouldAnnounceTrades() then
 				AddLootedItem(fullItemInfo, looterName, STATUS_HIDDEN)
 			end
@@ -1938,7 +1947,7 @@ end
 local function PLH_ProcessIdentifyUsersMessage()
 --	PLH_SendDebugMessage('Entering PLH_ProcessIdentifyUsersMessage()')
 
-	PLH_SendAddonMessage('VERSION~ ~' .. PLH_GetFullName('player') .. '~' .. C_AddOns.GetAddOnMetadata('PersonalLootHelper', 'Version'))
+	PLH_SendAddonMessage('VERSION~ ~' .. tostring(PLH_GetFullName('player')) .. '~' .. C_AddOns.GetAddOnMetadata('PersonalLootHelper', 'Version'))
 end	
 
 -- Event handler for CHAT_MSG_ADDON event
@@ -1948,6 +1957,9 @@ local function AddonMessageReceivedEvent(self, event, ...)
 	if prefix == 'PLH' then
 	
 		sender = PLH_GetFullName(sender)
+		if sender == nil then
+			return
+		end
 		
 		PLH_SendDebugMessage('Received AddonMessage: ' .. message .. ' from ' .. sender)
 		
@@ -2258,7 +2270,7 @@ end
 local function UpdateGroupInfoCache(unit)
 	local name = PLH_GetFullName(unit)
 	
-	PLH_SendDebugMessage('      Entering UpdateGroupInfoCache() for ' .. name)
+	PLH_SendDebugMessage('      Entering UpdateGroupInfoCache() for ' .. tostring(name))
 	
 	if name ~= nil then
 		local characterDetails
@@ -2309,7 +2321,7 @@ local function IsCharacterInGroup(characterName)
 	local index = 1
 	local name = select(1, GetRaidRosterInfo(index))
 	while name ~= nil do
-		if name == characterName or PLH_GetFullName(name) == characterName then
+		if (canaccessvalue(name) and name == characterName) or PLH_GetFullName(name) == characterName then
 			return true
 		end
 		index = index + 1
@@ -2325,6 +2337,9 @@ end
 local function InspectReadyEvent(self, event, ...)
 	local guid = select(1, ...)
 	local name = select(6, GetPlayerInfoByGUID(guid))
+	if not canaccessvalue(name) then
+		return
+	end
 	
 	PLH_SendDebugMessage('   Entering InspectReadyEvent() for ' .. name)
 
@@ -2471,7 +2486,7 @@ local function Enable()
 
 	LoadPlayerItems()
 	
-	PLH_SendAddonMessage('IDENTIFY_USERS~ ~' .. PLH_GetFullName('player'))
+	PLH_SendAddonMessage('IDENTIFY_USERS~ ~' .. tostring(PLH_GetFullName('player')))
 end
 
 local function Disable()
@@ -2602,9 +2617,11 @@ function SlashCmdList.PLHCommand(msg)
 		end
 		if itemInfo ~= nil then
 			local lootedItemIndex = AddLootedItem(GetFullItemInfo(itemLink), PLH_GetFullName('player'))
-			PLH_DoTradeItem(lootedItemIndex)
-			if PLH_PREFS[PLH_PREFS_SKIP_CONFIRMATION] then  -- show confirmation as chat since they won't see it in window
-				PLH_SendUserMessage("Thank you! Other PLH users have been notified that " .. itemLink .. " is available.")
+			if lootedItemIndex ~= nil then
+				PLH_DoTradeItem(lootedItemIndex)
+				if PLH_PREFS[PLH_PREFS_SKIP_CONFIRMATION] then  -- show confirmation as chat since they won't see it in window
+					PLH_SendUserMessage("Thank you! Other PLH users have been notified that " .. itemLink .. " is available.")
+				end
 			end
 		else
 			PLH_SendUserMessage("Usage:  /plh trade [item]")
