@@ -58,12 +58,18 @@ end
 function PLH_GetFullName(name)
 	if name == nil then
 		return nil
+	elseif not canaccessvalue(name) then
+		-- 12.0 can return a secret name here
+		return nil
 	elseif string.find(name, '-') ~= nil then
 		return GetNameWithoutSpacesInRealm(name)
 	else
 		local guid = UnitGUID(name)
 		if guid ~= nil then
 			local shortname, realm = UnitNameFromGUID(guid)
+			if not canaccessvalue(shortname) or not canaccessvalue(realm) then
+				return nil
+			end
 			if not realm or realm == '' then
 				realm = GetRealmName()
 			end
