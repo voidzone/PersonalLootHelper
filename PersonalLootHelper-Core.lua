@@ -619,95 +619,102 @@ local function GetILVLFromTooltip(tooltip)
 	return ilvl
 end
 
+local GFII_results = {}
+setmetatable(GFII_results, {__mode = "v"})
 local function GetFullItemInfo(item)
-	local ITEM_CLASSES_ALLOWED_PATTERN									= _G.ITEM_CLASSES_ALLOWED:gsub('%%s', '(.+)')		-- Classes: (.+)
-	local BIND_TRADE_TIME_REMAINING_PATTERN 							= _G.BIND_TRADE_TIME_REMAINING:gsub('%%s', '(.+)')  -- You may trade this item with players that were also eligible to loot this item for the next (.+).
-	local TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN_PATTERN 				= _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN:gsub('%%s', '(.+)')			-- You haven't collected this appearance
-	local TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN_PATTERN 	= _G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN:gsub('%%s', '(.+)')	-- You've collected this appearance, but not from this item
-	local TOOLTIP_AZERITE_UNLOCK_LEVELS_PATTERN							= _G.TOOLTIP_AZERITE_UNLOCK_LEVELS:gsub('%(0/%%d%)', '%%(0/%%d%%)')  		-- Azerite Powers (0/%d):
-	local CURRENTLY_SELECTED_AZERITE_POWERS_PATTERN						= _G.CURRENTLY_SELECTED_AZERITE_POWERS:gsub('%(%%d/%%d%)', '%%(%%d/%%d%%)')	-- Active Azerite Powers (%d/%d):
-	local fullItemInfo = {}
+	if GFII_results[item] then
+		return GFII_results[item]
+	else
+		local ITEM_CLASSES_ALLOWED_PATTERN									= _G.ITEM_CLASSES_ALLOWED:gsub('%%s', '(.+)')		-- Classes: (.+)
+		local BIND_TRADE_TIME_REMAINING_PATTERN 							= _G.BIND_TRADE_TIME_REMAINING:gsub('%%s', '(.+)')  -- You may trade this item with players that were also eligible to loot this item for the next (.+).
+		local TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN_PATTERN 				= _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN:gsub('%%s', '(.+)')			-- You haven't collected this appearance
+		local TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN_PATTERN 	= _G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN:gsub('%%s', '(.+)')	-- You've collected this appearance, but not from this item
+		--local TOOLTIP_AZERITE_UNLOCK_LEVELS_PATTERN							= _G.TOOLTIP_AZERITE_UNLOCK_LEVELS:gsub('%(0/%%d%)', '%%(0/%%d%%)')  		-- Azerite Powers (0/%d):
+		--local CURRENTLY_SELECTED_AZERITE_POWERS_PATTERN						= _G.CURRENTLY_SELECTED_AZERITE_POWERS:gsub('%(%%d/%%d%)', '%%(%%d/%%d%%)')	-- Active Azerite Powers (%d/%d):
+		local fullItemInfo = {}
 
-	if item ~= nil then
-		fullItemInfo[FII_ITEM] = item
-		
-		-- determine the basic values from the Blizzard GetItemInfo() API call
-		_, _, fullItemInfo[FII_QUALITY], fullItemInfo[FII_BASE_ILVL], fullItemInfo[FII_REQUIRED_LEVEL], _, _, _, fullItemInfo[FII_ITEM_EQUIP_LOC], _, _, fullItemInfo[FII_CLASS], fullItemInfo[FII_SUB_CLASS], fullItemInfo[FII_BIND_TYPE], _, _, _ = GetItemInfo(item)
+		if item ~= nil then
+			fullItemInfo[FII_ITEM] = item
+			
+			-- determine the basic values from the Blizzard GetItemInfo() API call
+			_, _, fullItemInfo[FII_QUALITY], fullItemInfo[FII_BASE_ILVL], fullItemInfo[FII_REQUIRED_LEVEL], _, _, _, fullItemInfo[FII_ITEM_EQUIP_LOC], _, _, fullItemInfo[FII_CLASS], fullItemInfo[FII_SUB_CLASS], fullItemInfo[FII_BIND_TYPE], _, _, _ = GetItemInfo(item)
 
-		-- determine whether the item is equippable
-		fullItemInfo[FII_IS_EQUIPPABLE] = IsEquippableItem(item)
+			-- determine whether the item is equippable
+			fullItemInfo[FII_IS_EQUIPPABLE] = IsEquippableItem(item)
 
-		if fullItemInfo[FII_IS_EQUIPPABLE] then
+			if fullItemInfo[FII_IS_EQUIPPABLE] then
 
-			-- set up the tooltip to determine values that aren't returned via GetItemInfo()
-			tooltipLong = tooltipLong or CreateFrame("GameTooltip", "PLHScanTooltip", nil, "GameTooltipTemplate")
-			tooltipLong:SetOwner(WorldFrame, "ANCHOR_NONE")
-			tooltipLong:ClearLines()
-			tooltipLong:SetHyperlink(item)
-			tooltipLong.leftside = {}
-			local i=1
-			while _G["PLHScanTooltipTextLeft" .. i] do
-				tooltipLong.leftside[i] = _G["PLHScanTooltipTextLeft" .. i]
-				i = i + 1
-			end
-
-			-- determine the real iLVL
-			local realILVL = GetILVLFromTooltip(tooltipLong)
-			if realILVL == nil then  -- if we still couldn't find it (shouldn't happen), just use the base ilvl we got from GetItemInfo()
-				realILVL = fullItemInfo[FII_BASE_ILVL]
-			end
-			fullItemInfo[FII_REAL_ILVL] = tonumber(realILVL)
-
-			local classes = nil
-			local hasBindTradeTimeWarning = nil
-			local hasSocket = false
-			local hasAvoidance = false
-			local hasIndestructible = false
-			local hasLeech = false
-			local hasSpeed = false
-			local xmoggable = false
-			local isAzeriteItem = false
-			local text
-
-			local index = 6 -- the elements we're looking for are all further down in the tooltip
-			while tooltipLong.leftside[index] do
-				text = tooltipLong.leftside[index]:GetText()
-				if text ~= nil then
-					hasBindTradeTimeWarning = hasBindTradeTimeWarning or text:match(BIND_TRADE_TIME_REMAINING_PATTERN)
-					classes = classes or text:match(ITEM_CLASSES_ALLOWED_PATTERN)
-					hasSocket = hasSocket or text:find(_G.EMPTY_SOCKET_PRISMATIC) == 1
-					hasAvoidance = hasAvoidance or text:find(_G.STAT_AVOIDANCE) ~= nil
-					hasIndestructible = hasIndestructible or text:find(_G.STAT_STURDINESS) == 1
-					hasLeech = hasLeech or text:find(_G.STAT_LIFESTEAL) ~= nil
-					hasSpeed = hasSpeed or text:find(_G.STAT_SPEED) ~= nil
-					xmoggable = xmoggable or text:find(TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN_PATTERN) ~= nil or text:find(TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN_PATTERN) ~= nil
-					isAzeriteItem = isAzeriteItem or text:match(TOOLTIP_AZERITE_UNLOCK_LEVELS_PATTERN) ~= nil or text:match(CURRENTLY_SELECTED_AZERITE_POWERS_PATTERN) ~= nil
+				-- set up the tooltip to determine values that aren't returned via GetItemInfo()
+				tooltipLong = tooltipLong or CreateFrame("GameTooltip", "PLHScanTooltip", nil, "GameTooltipTemplate")
+				tooltipLong:SetOwner(WorldFrame, "ANCHOR_NONE")
+				tooltipLong:ClearLines()
+				tooltipLong:SetHyperlink(item)
+				tooltipLong.leftside = {}
+				local i=1
+				while _G["PLHScanTooltipTextLeft" .. i] do
+					tooltipLong.leftside[i] = _G["PLHScanTooltipTextLeft" .. i]
+					i = i + 1
 				end
-				index = index + 1
+
+				-- determine the real iLVL
+				local realILVL = GetILVLFromTooltip(tooltipLong)
+				if realILVL == nil then  -- if we still couldn't find it (shouldn't happen), just use the base ilvl we got from GetItemInfo()
+					realILVL = fullItemInfo[FII_BASE_ILVL]
+				end
+				fullItemInfo[FII_REAL_ILVL] = tonumber(realILVL)
+
+				local classes = nil
+				local hasBindTradeTimeWarning = nil
+				local hasSocket = false
+				local hasAvoidance = false
+				local hasIndestructible = false
+				local hasLeech = false
+				local hasSpeed = false
+				local xmoggable = false
+				local isAzeriteItem = false
+				local text
+
+				local index = 6 -- the elements we're looking for are all further down in the tooltip
+				while tooltipLong.leftside[index] do
+					text = tooltipLong.leftside[index]:GetText()
+					if text ~= nil then
+						hasBindTradeTimeWarning = hasBindTradeTimeWarning or text:match(BIND_TRADE_TIME_REMAINING_PATTERN)
+						classes = classes or text:match(ITEM_CLASSES_ALLOWED_PATTERN)
+						hasSocket = hasSocket or text:find(_G.EMPTY_SOCKET_PRISMATIC) == 1
+						hasAvoidance = hasAvoidance or text:find(_G.STAT_AVOIDANCE) ~= nil
+						hasIndestructible = hasIndestructible or text:find(_G.STAT_STURDINESS) == 1
+						hasLeech = hasLeech or text:find(_G.STAT_LIFESTEAL) ~= nil
+						hasSpeed = hasSpeed or text:find(_G.STAT_SPEED) ~= nil
+						xmoggable = xmoggable or text:find(TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN_PATTERN) ~= nil or text:find(TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN_PATTERN) ~= nil
+						--isAzeriteItem = isAzeriteItem or text:match(TOOLTIP_AZERITE_UNLOCK_LEVELS_PATTERN) ~= nil or text:match(CURRENTLY_SELECTED_AZERITE_POWERS_PATTERN) ~= nil
+					end
+					index = index + 1
+				end
+
+				if classes ~= nil then
+					classes = string.upper(classes)
+					classes = string.gsub(classes, ' ', '')  -- remove space for DEMON HUNTER, DEATH KNIGHT
+				end
+
+	--			if hasBindTradeTimeWarning then
+	--				print("SETTING FII_TRADE_TIME_WARNING_SHOWN TO TRUE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	--			end
+
+				fullItemInfo[FII_CLASSES] = classes
+				fullItemInfo[FII_TRADE_TIME_WARNING_SHOWN] = hasBindTradeTimeWarning
+				fullItemInfo[FII_HAS_SOCKET] = hasSocket
+				fullItemInfo[FII_HAS_AVOIDANCE] = hasAvoidance
+				fullItemInfo[FII_HAS_INDESTRUCTIBLE] = hasIndestructible
+				fullItemInfo[FII_HAS_LEECH] = hasLeech
+				fullItemInfo[FII_HAS_SPEED] = hasSpeed
+				fullItemInfo[FII_XMOGGABLE] = xmoggable
+				fullItemInfo[FII_IS_AZERITE_ITEM] = isAzeriteItem
 			end
-
-			if classes ~= nil then
-				classes = string.upper(classes)
-				classes = string.gsub(classes, ' ', '')  -- remove space for DEMON HUNTER, DEATH KNIGHT
-			end
-
---			if hasBindTradeTimeWarning then
---				print("SETTING FII_TRADE_TIME_WARNING_SHOWN TO TRUE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
---			end
-
-			fullItemInfo[FII_CLASSES] = classes
-			fullItemInfo[FII_TRADE_TIME_WARNING_SHOWN] = hasBindTradeTimeWarning
-			fullItemInfo[FII_HAS_SOCKET] = hasSocket
-			fullItemInfo[FII_HAS_AVOIDANCE] = hasAvoidance
-			fullItemInfo[FII_HAS_INDESTRUCTIBLE] = hasIndestructible
-			fullItemInfo[FII_HAS_LEECH] = hasLeech
-			fullItemInfo[FII_HAS_SPEED] = hasSpeed
-			fullItemInfo[FII_XMOGGABLE] = xmoggable
-			fullItemInfo[FII_IS_AZERITE_ITEM] = isAzeriteItem
 		end
-	end
 
-	return fullItemInfo
+		GFII_results[item] = fullItemInfo
+		return fullItemInfo
+	end
 end
 
 --[[ FUNCTIONS TO CHECK IF ITEM IS EQUIPPABLE ]]--
