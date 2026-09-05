@@ -5,6 +5,8 @@
 ## Notes: Simplifies trading of personal loot with other group members.
 ## Author: cardinalm1, Elvenbane
 
+## X-Curse-Project-ID: 102044
+
 libs\LibStub\LibStub.lua
 libs\MSA-DropDownMenu-1.0\MSA-DropDownMenu-1.0.xml
 PersonalLootHelper-GlobalConstants.lua
